@@ -37,6 +37,18 @@ fn main() {
         (start..end).into_iter().for_each(|x| list.push(x));
         scan_ports(&args.addr, list);
     }
+
+    if let Some(ports) = args.list {
+        let mut list = vec![];
+        let mut split = ports.split(",");
+        loop {
+            match split.next() {
+                Some(v) => list.push(v.parse().unwrap()),
+                None => break,
+            }
+        }
+        scan_ports(&args.addr, list)
+    }
 }
 
 fn scan_ports(addr: &String, list: Vec<u16>) {}
