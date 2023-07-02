@@ -1,3 +1,9 @@
+use std::{
+    net::{SocketAddr, TcpStream},
+    str::FromStr,
+    time::Duration,
+};
+
 use clap::Parser;
 
 #[derive(Parser)]
@@ -51,4 +57,21 @@ fn main() {
     }
 }
 
-fn scan_ports(addr: &String, list: Vec<u16>) {}
+fn scan_ports(addr: &String, list: Vec<u16>) {
+    let mut handles = vec![];
+    for port in list {
+        let host = format!("{}:{}", addr, port);
+        let handle = std::thread::spawn(move || {
+            let socket_addr = SocketAddr::from_str(host.as_str()).unwrap();
+            match TcpStream::connect_timeout(&socket_addr, Duration::from_secs(3)) {
+                Ok(_) => println!("port {} is OPEN", port),
+                Err(_) => println!("port {} is NOT OPEN", port),
+            }
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+}
